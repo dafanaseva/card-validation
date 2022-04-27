@@ -1,7 +1,6 @@
 ﻿using CardValidation.Core.Services.Interfaces;
 using CardValidation.ViewModels;
 using Microsoft.AspNetCore.Mvc.Filters;
-using System.Text.Json;
 
 namespace CardValidation.Infrustructure
 {
@@ -22,25 +21,25 @@ namespace CardValidation.Infrustructure
 
         public void OnActionExecuting(ActionExecutingContext context)
         {
-            if (context.ActionArguments != null && context.ActionArguments.Count > 0)
-            {
-                CreditCard? card;
-                if (context.ActionArguments.TryGetValue("creditCard", out object? value))
-                {
-                    card = value as CreditCard;
+            if (context.ActionArguments == null || context.ActionArguments.Count <= 0)
+                return;
 
-                    if (card != null)
-                    {
-                        ValidateParameter(context, nameof(card.Owner), card.Owner, cardValidationService.ValidateOwner);
-                        ValidateParameter(context, nameof(card.Date), card.Date, cardValidationService.ValidateIssueDate);
-                        ValidateParameter(context, nameof(card.Cvv), card.Cvv, cardValidationService.ValidateCvc);
-                        ValidateParameter(context, nameof(card.Number), card.Number, cardValidationService.ValidateNumber);
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException();
-                    }
-                }
+            CreditCard? card;
+            if (!context.ActionArguments.TryGetValue("creditCard", out object? value))
+                return;
+
+            card = value as CreditCard;
+
+            if (card != null)
+            {
+                ValidateParameter(context, nameof(card.Owner), card.Owner, cardValidationService.ValidateOwner);
+                ValidateParameter(context, nameof(card.Date), card.Date, cardValidationService.ValidateIssueDate);
+                ValidateParameter(context, nameof(card.Cvv), card.Cvv, cardValidationService.ValidateCvc);
+                ValidateParameter(context, nameof(card.Number), card.Number, cardValidationService.ValidateNumber);
+            }
+            else
+            {
+                throw new InvalidOperationException();
             }
         }
 
@@ -55,9 +54,9 @@ namespace CardValidation.Infrustructure
             {
                 AddParameterIsRequiredError(context, name);
             }
-            else
+            else if (!isParameterValid(value))
             {
-                if (!isParameterValid(value)) { AddWrongParameterError(context, name); }
+                AddWrongParameterError(context, name);
             }
         }
     }

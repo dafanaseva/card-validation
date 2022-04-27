@@ -10,12 +10,11 @@ namespace CardValidation.Tests
     {
         private ICardValidationService cardValidationService;
 
-        [SetUp]
-        public void Setup()
+        public Tests()
         {
             cardValidationService = new CardValidationService();
-        }
 
+        }
 
         [Test]
         [TestCase("5555555555554444", true, PaymentSystemType.MasterCard)]
